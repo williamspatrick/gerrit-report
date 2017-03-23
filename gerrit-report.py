@@ -17,9 +17,24 @@ def changes():
     return changes
 
 username_map = {
+    'adamliyi': "@shyili",
+    'amboar': "@arj",
+    'anoo1': "@anoo",
+    'bradbishop': "@bradleyb",
+    'chinaridinesh': "@chinari",
+    'dkodihal': "@dkodihal",
+    'geissonator': "@andrewg",
     'jenkins-openbmc': "Jenkins",
+    'JoshDKing': "@jdking",
+    'mine260309': "@shyulei",
+    'msbarth': "@msbarth",
+    'ratagupt': "@ratagupt",
+    'saqibkh': "@khansa",
+    'shenki': "@jms",
+    'spinler': "@spinler",
+    'tomjoseph83': "@tomjoseph",
+    'vishwabmc': "@vishwanath",
     'williamspatrick': "@iawillia",
-    'bradbishop': "@bradleyb"
 }
 
 def map_username(user, name):
@@ -63,14 +78,6 @@ def reason(change):
     owner = map_username(change['owner']['username'], change['owner']['name'])
     reviewers = map_reviewers(change['allReviewers'], owner)
     approvals = map_approvals(change['currentPatchSet']['approvals'])
-
-
-#    print("----")
-#    print(subject)
-#    print(owner)
-#    print(approvals)
-#    print(reviewers)
-#    print("----")
 
     if len(reviewers) < 2:
         return "%s has added insufficient reviewers." % owner

@@ -6,7 +6,7 @@ import json
 def changes():
     s = subprocess.getoutput("ssh openbmc.gerrit gerrit query " +
                              "--format json --all-reviewers " +
-                             "--current-patch-set -- " +
+                             "--dependencies --current-patch-set -- " +
                              "'age:1d status:open -is:draft " +
                              "label:Code-Review>=-1 " +
                              "-project:openbmc/openbmc-test-automation'")
@@ -102,7 +102,13 @@ def reason(change):
                (", ".join(set(reviewers) - set(reviewed_by)))
 
     if ('Verified' not in approvals):
-        return "May be missing Jenkins verification."
+        return "May be missing Jenkins verification (%s)." % owner
+
+    if ('dependsOn' in change) and (len(change['dependsOn'])):
+        for dep in change['dependsOn']:
+            if not dep['isCurrentPatchSet']:
+                return "Depends on out of date patch set %s (%s)." % \
+                       (dep['id'], owner)
 
     approved_by = list(filter(lambda x: reviewed[x] == 2, reviewed))
     if len(approved_by):

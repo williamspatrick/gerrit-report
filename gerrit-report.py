@@ -3,18 +3,19 @@
 import subprocess
 import json
 
-def changes():
+def query(*args):
     s = subprocess.getoutput("ssh openbmc.gerrit gerrit query " +
                              "--format json --all-reviewers " +
-                             "--dependencies --current-patch-set -- " +
-                             "'age:1d status:open -is:draft " +
-                             "label:Code-Review>=-1 " +
-                             "-project:openbmc/openbmc-test-automation'")
+                             "--dependencies --current-patch-set -- '" +
+                             " ".join(args) + "'")
+    results = list(map(json.loads, s.splitlines()))
+    del results[-1]
 
-    changes = list(map(json.loads, s.splitlines()))
-    del changes[-1]
+    return results
 
-    return changes
+def changes():
+    return query("age:1d", "status:open", "-is:draft", "label:Code-Review>=-1",
+                 "-project:openbmc/openbmc-test-automation")
 
 username_map = {
     'adamliyi': "@shyili",

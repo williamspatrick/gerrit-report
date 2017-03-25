@@ -4,6 +4,8 @@ import argparse
 import subprocess
 import json
 
+option_age = ""
+
 query_cache = {}
 
 def query(*args):
@@ -20,7 +22,8 @@ def query(*args):
     return results
 
 def changes():
-    return query("age:1d", "status:open", "-is:draft", "label:Code-Review>=-1",
+    return query("age:%s" % option_age,
+                 "status:open", "-is:draft", "label:Code-Review>=-1",
                  "-project:openbmc/openbmc-test-automation")
 
 def change_by_id(change_id):
@@ -145,12 +148,18 @@ def do_report(args):
         print("----")
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--age', help='Change age since last modified', type=str,
+                    default="1d")
 subparsers = parser.add_subparsers()
 
 report = subparsers.add_parser('report', help='Generate report')
 report.set_defaults(func=do_report)
 
 args = parser.parse_args()
+
+if 'age' in args:
+    option_age = args.age;
+
 if 'func' in args:
     args.func(args)
 else:

@@ -1,5 +1,6 @@
 #!/bin/env python
 
+import argparse
 import subprocess
 import json
 
@@ -136,9 +137,21 @@ def reason(change):
     else:
         return "Awaiting merge review."
 
-for c in changes():
-    print(c['subject'])
-    print(c['url'])
-    print(reason(c))
-    print("----")
+def do_report(args):
+    for c in changes():
+        print("%s - %s" % (c['url'], c['id']))
+        print(c['subject'])
+        print(reason(c))
+        print("----")
 
+parser = argparse.ArgumentParser()
+subparsers = parser.add_subparsers()
+
+report = subparsers.add_parser('report', help='Generate report')
+report.set_defaults(func=do_report)
+
+args = parser.parse_args()
+if 'func' in args:
+    args.func(args)
+else:
+    parser.print_help()

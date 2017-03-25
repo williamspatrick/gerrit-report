@@ -3,6 +3,8 @@
 import subprocess
 import json
 
+query_cache = {}
+
 def query(*args):
     s = subprocess.getoutput("ssh openbmc.gerrit gerrit query " +
                              "--format json --all-reviewers " +
@@ -11,11 +13,22 @@ def query(*args):
     results = list(map(json.loads, s.splitlines()))
     del results[-1]
 
+    for r in results:
+        query_cache[r['id']] = r
+
     return results
 
 def changes():
     return query("age:1d", "status:open", "-is:draft", "label:Code-Review>=-1",
                  "-project:openbmc/openbmc-test-automation")
+
+def change_by_id(change_id):
+    if change_id in query_cache:
+        return query_cache[change_id]
+    c = query(change_id)
+    if len(c):
+        return c[0]
+    return None
 
 username_map = {
     'adamliyi': "@shyili",
@@ -109,6 +122,12 @@ def reason(change):
         for dep in change['dependsOn']:
             if not dep['isCurrentPatchSet']:
                 return "Depends on out of date patch set %s (%s)." % \
+                       (dep['id'], owner)
+            dep_info = change_by_id(dep['id'])
+            if not dep_info:
+                continue
+            if dep_info['status'] != "MERGED":
+                return "Depends on unmerged patch set %s (%s)." % \
                        (dep['id'], owner)
 
     approved_by = list(filter(lambda x: reviewed[x] == 2, reviewed))

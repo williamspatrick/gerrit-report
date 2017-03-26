@@ -22,8 +22,9 @@ def query(*args):
     return results
 
 def changes():
-    return query("age:%s" % option_age,
-                 "status:open", "-is:draft", "label:Code-Review>=-1",
+    args= "age:%s" % option_age
+    return query(args,
+                 "status:open", "-is:draft", "-label:Code-Review=-2",
                  "-project:openbmc/openbmc-test-automation")
 
 def change_by_id(change_id):
@@ -98,8 +99,14 @@ def map_reviewers(reviewers, owner):
 def reason(change):
     subject = change['subject']
     owner = map_username(change['owner']['username'], change['owner']['name'])
-    reviewers = map_reviewers(change['allReviewers'], owner)
-    approvals = map_approvals(change['currentPatchSet']['approvals'])
+    if 'allReviewers' in change:
+        reviewers = map_reviewers(change['allReviewers'], owner)
+    else:
+        reviewers = []
+    if 'approvals' in change['currentPatchSet']:
+        approvals = map_approvals(change['currentPatchSet']['approvals'])
+    else:
+        approvals = {}
 
     if len(reviewers) < 2:
         return "%s has added insufficient reviewers." % owner

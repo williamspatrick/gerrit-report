@@ -5,6 +5,7 @@ import subprocess
 import json
 
 option_age = ""
+option_owner = None
 
 query_cache = {}
 
@@ -23,6 +24,8 @@ def query(*args):
 
 def changes():
     args= "age:%s" % option_age
+    if option_owner:
+        args += " ( %s )" % option_owner
     return query(args,
                  "status:open", "-is:draft", "-label:Code-Review=-2",
                  "-project:openbmc/openbmc-test-automation")
@@ -161,6 +164,8 @@ def do_report(args):
 parser = argparse.ArgumentParser()
 parser.add_argument('--age', help='Change age since last modified', type=str,
                     default="1d")
+parser.add_argument('--owner', help='Change owner', type=str,
+                    action='append')
 subparsers = parser.add_subparsers()
 
 report = subparsers.add_parser('report', help='Generate report')
@@ -170,6 +175,9 @@ args = parser.parse_args()
 
 if 'age' in args:
     option_age = args.age;
+if ('owner' in args) and args.owner:
+    option_owner = " OR ".join(map(lambda x: "owner:" + x,
+                                   args.owner));
 
 if 'func' in args:
     args.func(args)

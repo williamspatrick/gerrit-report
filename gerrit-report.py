@@ -10,6 +10,7 @@ option_protocol = 'slack'
 
 query_cache = {}
 
+
 def query(*args):
     s = subprocess.getoutput("ssh openbmc.gerrit gerrit query " +
                              "--format json --all-reviewers " +
@@ -23,13 +24,15 @@ def query(*args):
 
     return results
 
+
 def changes():
-    args= "age:{}".format(option_age)
+    args = "age:{}".format(option_age)
     if option_owner:
         args += " ( {} )".format(option_owner)
     return query(args,
                  "status:open", "-is:draft", "-label:Code-Review=-2",
                  "-project:openbmc/openbmc-test-automation")
+
 
 def change_by_id(change_id):
     if change_id in query_cache:
@@ -38,6 +41,7 @@ def change_by_id(change_id):
     if len(c):
         return c[0]
     return None
+
 
 username_map = {
     'irc': {
@@ -70,9 +74,11 @@ username_map = {
     },
 }
 
+
 def map_username(user):
-    return username_map[option_protocol].\
-                get(user[0], "[{}: {}]".format(user[0], user[1]))
+    return username_map[option_protocol].get(
+        user[0], "[{}: {}]".format(user[0], user[1]))
+
 
 def map_approvals(approvals):
     mapped = {}
@@ -87,6 +93,7 @@ def map_approvals(approvals):
         mapped[approval_type][approval_owner[0]] = approval_score
 
     return mapped
+
 
 def map_reviewers(reviewers, owner):
     mapped = []
@@ -162,13 +169,14 @@ def reason(change):
     else:
         return ("Awaiting merge review.", [], None)
 
+
 def do_report(args):
     for c in changes():
         print("{} - {}".format(c['url'], c['id']))
         print(c['subject'])
-        (r,people,dep) = reason(c)
+        (r, people, dep) = reason(c)
         people = ", ".join(map(map_username, people))
-        print(r.format(people,dep))
+        print(r.format(people, dep))
         print("----")
 
 parser = argparse.ArgumentParser()
@@ -186,10 +194,10 @@ report.set_defaults(func=do_report)
 args = parser.parse_args()
 
 if 'age' in args:
-    option_age = args.age;
+    option_age = args.age
 if ('owner' in args) and args.owner:
     option_owner = " OR ".join(map(lambda x: "owner:" + x,
-                                   args.owner));
+                                   args.owner))
 if 'protocol' in args:
     option_protocol = args.protocol
 

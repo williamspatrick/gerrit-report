@@ -6,6 +6,7 @@ import json
 
 option_age = ""
 option_owner = None
+option_protocol = 'slack'
 
 query_cache = {}
 
@@ -39,32 +40,39 @@ def change_by_id(change_id):
     return None
 
 username_map = {
-    'adamliyi': "@shyili",
-    'amboar': "@arj",
-    'anoo1': "@anoo",
-    'bradbishop': "@bradleyb",
-    'chinaridinesh': "@chinari",
-    'dhruvibm': "@dhruvaraj",
-    'dkodihal': "@dkodihal",
-    'geissonator': "@andrewg",
-    'gtmills': "@gmills",
-    'jenkins-openbmc': "Jenkins",
-    'JoshDKing': "@jdking",
-    'mine260309': "@shyulei",
-    'msbarth': "@msbarth",
-    'mtritz': "@mtritz",
-    'ojayanth': "@ojayanth",
-    'ratagupt': "@ratagupt",
-    'saqibkh': "@khansa",
-    'shenki': "@jms",
-    'spinler': "@spinler",
-    'tomjoseph83': "@tomjoseph",
-    'vishwabmc': "@vishwanath",
-    'williamspatrick': "@iawillia",
+    'irc': {
+        'jenkins-openbmc': "Jenkins",
+        'williamspatrick': "stwcx",
+    },
+    'slack': {
+        'adamliyi': "@shyili",
+        'amboar': "@arj",
+        'anoo1': "@anoo",
+        'bradbishop': "@bradleyb",
+        'chinaridinesh': "@chinari",
+        'dhruvibm': "@dhruvaraj",
+        'dkodihal': "@dkodihal",
+        'geissonator': "@andrewg",
+        'gtmills': "@gmills",
+        'jenkins-openbmc': "Jenkins",
+        'JoshDKing': "@jdking",
+        'mine260309': "@shyulei",
+        'msbarth': "@msbarth",
+        'mtritz': "@mtritz",
+        'ojayanth': "@ojayanth",
+        'ratagupt': "@ratagupt",
+        'saqibkh': "@khansa",
+        'shenki': "@jms",
+        'spinler': "@spinler",
+        'tomjoseph83': "@tomjoseph",
+        'vishwabmc': "@vishwanath",
+        'williamspatrick': "@iawillia",
+    },
 }
 
 def map_username(user):
-    return username_map.get(user[0], "[{}: {}]".format(user[0], user[1]))
+    return username_map[option_protocol].\
+                get(user[0], "[{}: {}]".format(user[0], user[1]))
 
 def map_approvals(approvals):
     mapped = {}
@@ -168,6 +176,8 @@ parser.add_argument('--age', help='Change age since last modified', type=str,
                     default="1d")
 parser.add_argument('--owner', help='Change owner', type=str,
                     action='append')
+parser.add_argument('--protocol', help='Protocol for username conversion',
+                    type=str, choices=(username_map.keys()))
 subparsers = parser.add_subparsers()
 
 report = subparsers.add_parser('report', help='Generate report')
@@ -180,6 +190,8 @@ if 'age' in args:
 if ('owner' in args) and args.owner:
     option_owner = " OR ".join(map(lambda x: "owner:" + x,
                                    args.owner));
+if 'protocol' in args:
+    option_protocol = args.protocol
 
 if 'func' in args:
     args.func(args)

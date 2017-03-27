@@ -14,7 +14,10 @@ the OpenBMC merge policies.
 
 Generate a report for all commits untouched in the last day:
 
-```gerrit-report.py report```
+```
+gerrit-report.py --protocol slack report
+gerrit-report.py --protocol irc report
+```
 
 ## Individual developer
 

@@ -198,7 +198,7 @@ if 'age' in args:
 if ('owner' in args) and args.owner:
     option_owner = " OR ".join(map(lambda x: "owner:" + x,
                                    args.owner))
-if 'protocol' in args:
+if 'protocol' in args and args.protocol:
     option_protocol = args.protocol
 
 if 'func' in args:

@@ -139,14 +139,14 @@ def reason(change):
     if ('dependsOn' in change) and (len(change['dependsOn'])):
         for dep in change['dependsOn']:
             if not dep['isCurrentPatchSet']:
-                return "Depends on out of date patch set {0} ({1}).".\
-                       format(dep['id'], owner)
+                return "Depends on out of date patch set {1} ({0}).".\
+                       format(owner, dep['id'])
             dep_info = change_by_id(dep['id'])
             if not dep_info:
                 continue
             if dep_info['status'] != "MERGED":
-                return "Depends on unmerged patch set {0} ({1}).".\
-                       format(dep['id'], owner)
+                return "Depends on unmerged patch set {1} ({0}).".\
+                       format(owner, dep['id'])
 
     approved_by = list(filter(lambda x: reviewed[x] == 2, reviewed))
     if len(approved_by):

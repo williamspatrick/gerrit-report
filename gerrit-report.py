@@ -63,20 +63,20 @@ username_map = {
     'williamspatrick': "@iawillia",
 }
 
-def map_username(user, name):
-    return username_map.get(user, "[{}: {}]".format(user, name))
+def map_username(user):
+    return username_map.get(user[0], "[{}: {}]".format(user[0], user[1]))
 
 def map_approvals(approvals):
     mapped = {}
     for a in approvals:
         approval_type = a['type']
-        approval_owner = map_username(a['by']['username'], a['by']['name'])
+        approval_owner = (a['by']['username'], a['by']['name'])
         approval_score = int(a['value'])
 
         if approval_type not in mapped:
             mapped[approval_type] = {}
 
-        mapped[approval_type][approval_owner] = approval_score
+        mapped[approval_type][approval_owner[0]] = approval_score
 
     return mapped
 
@@ -89,9 +89,9 @@ def map_reviewers(reviewers, owner):
         if reviewer_user == 'jenkins-openbmc':
             continue
 
-        reviewer_username = map_username(r['username'], r['name'])
+        reviewer_username = (r['username'], r['name'])
 
-        if reviewer_username == owner:
+        if reviewer_user == owner[0]:
             continue
 
         mapped.append(reviewer_username)
@@ -101,7 +101,7 @@ def map_reviewers(reviewers, owner):
 
 def reason(change):
     subject = change['subject']
-    owner = map_username(change['owner']['username'], change['owner']['name'])
+    owner = (change['owner']['username'], change['owner']['name'])
     if 'allReviewers' in change:
         reviewers = map_reviewers(change['allReviewers'], owner)
     else:
@@ -159,7 +159,7 @@ def do_report(args):
         print("{} - {}".format(c['url'], c['id']))
         print(c['subject'])
         (r,people,dep) = reason(c)
-        people = ", ".join(people)
+        people = ", ".join(map(map_username, people))
         print(r.format(people,dep))
         print("----")
 

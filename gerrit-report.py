@@ -23,9 +23,9 @@ def query(*args):
     return results
 
 def changes():
-    args= "age:%s" % option_age
+    args= "age:{}".format(option_age)
     if option_owner:
-        args += " ( %s )" % option_owner
+        args += " ( {} )".format(option_owner)
     return query(args,
                  "status:open", "-is:draft", "-label:Code-Review=-2",
                  "-project:openbmc/openbmc-test-automation")
@@ -64,7 +64,7 @@ username_map = {
 }
 
 def map_username(user, name):
-    return username_map.get(user, "[%s: %s]" % (user, name))
+    return username_map.get(user, "[{}: {}]".format(user, name))
 
 def map_approvals(approvals):
     mapped = {}
@@ -112,51 +112,51 @@ def reason(change):
         approvals = {}
 
     if len(reviewers) < 2:
-        return "%s has added insufficient reviewers." % owner
+        return "{0} has added insufficient reviewers.".format(owner)
 
     if ('Verified' in approvals):
         verified = approvals['Verified']
         scores = list(filter(lambda x: verified[x] < 0, verified))
         if len(scores):
-            return "%s should resolve verification failure." % owner
+            return "{0} should resolve verification failure.".format(owner)
 
     if ('Code-Review' not in approvals):
-        return "Missing code review by %s." % (", ".join(reviewers))
+        return "Missing code review by {0}.".format(", ".join(reviewers))
 
     reviewed = approvals['Code-Review']
     rejected_by = list(filter(lambda x: reviewed[x] < 0, reviewed))
     if len(rejected_by):
-        return "%s should resolve code review comments." % owner
+        return "{0} should resolve code review comments.".format(owner)
 
     reviewed_by = list(filter(lambda x: reviewed[x] > 0, reviewed))
     if len(reviewed_by) < 2:
-        return "Missing code review by %s." % \
-               (", ".join(set(reviewers) - set(reviewed_by)))
+        return "Missing code review by {0}.".\
+               format(", ".join(set(reviewers) - set(reviewed_by)))
 
     if ('Verified' not in approvals):
-        return "May be missing Jenkins verification (%s)." % owner
+        return "May be missing Jenkins verification ({0}).".format(owner)
 
     if ('dependsOn' in change) and (len(change['dependsOn'])):
         for dep in change['dependsOn']:
             if not dep['isCurrentPatchSet']:
-                return "Depends on out of date patch set %s (%s)." % \
-                       (dep['id'], owner)
+                return "Depends on out of date patch set {0} ({1}).".\
+                       format(dep['id'], owner)
             dep_info = change_by_id(dep['id'])
             if not dep_info:
                 continue
             if dep_info['status'] != "MERGED":
-                return "Depends on unmerged patch set %s (%s)." % \
-                       (dep['id'], owner)
+                return "Depends on unmerged patch set {0} ({1}).".\
+                       format(dep['id'], owner)
 
     approved_by = list(filter(lambda x: reviewed[x] == 2, reviewed))
     if len(approved_by):
-        return "Ready for merge by %s." % (", ".join(approved_by))
+        return "Ready for merge by {0}.".format(", ".join(approved_by))
     else:
         return "Awaiting merge review."
 
 def do_report(args):
     for c in changes():
-        print("%s - %s" % (c['url'], c['id']))
+        print("{} - {}".format(c['url'], c['id']))
         print(c['subject'])
         print(reason(c))
         print("----")

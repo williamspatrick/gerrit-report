@@ -112,53 +112,54 @@ def reason(change):
         approvals = {}
 
     if len(reviewers) < 2:
-        return "{0} has added insufficient reviewers.".format(owner)
+        return ("{0} has added insufficient reviewers.", owner, None)
 
     if ('Verified' in approvals):
         verified = approvals['Verified']
         scores = list(filter(lambda x: verified[x] < 0, verified))
         if len(scores):
-            return "{0} should resolve verification failure.".format(owner)
+            return ("{0} should resolve verification failure.", owner, None)
 
     if ('Code-Review' not in approvals):
-        return "Missing code review by {0}.".format(", ".join(reviewers))
+        return ("Missing code review by {0}.", ", ".join(reviewers), None)
 
     reviewed = approvals['Code-Review']
     rejected_by = list(filter(lambda x: reviewed[x] < 0, reviewed))
     if len(rejected_by):
-        return "{0} should resolve code review comments.".format(owner)
+        return ("{0} should resolve code review comments.", owner, None)
 
     reviewed_by = list(filter(lambda x: reviewed[x] > 0, reviewed))
     if len(reviewed_by) < 2:
-        return "Missing code review by {0}.".\
-               format(", ".join(set(reviewers) - set(reviewed_by)))
+        return ("Missing code review by {0}.",
+                ", ".join(set(reviewers) - set(reviewed_by)), None)
 
     if ('Verified' not in approvals):
-        return "May be missing Jenkins verification ({0}).".format(owner)
+        return ("May be missing Jenkins verification ({0}).", owner, None)
 
     if ('dependsOn' in change) and (len(change['dependsOn'])):
         for dep in change['dependsOn']:
             if not dep['isCurrentPatchSet']:
-                return "Depends on out of date patch set {1} ({0}).".\
-                       format(owner, dep['id'])
+                return ("Depends on out of date patch set {1} ({0}).",
+                        owner, dep['id'])
             dep_info = change_by_id(dep['id'])
             if not dep_info:
                 continue
             if dep_info['status'] != "MERGED":
-                return "Depends on unmerged patch set {1} ({0}).".\
-                       format(owner, dep['id'])
+                return ("Depends on unmerged patch set {1} ({0}).",
+                        owner, dep['id'])
 
     approved_by = list(filter(lambda x: reviewed[x] == 2, reviewed))
     if len(approved_by):
-        return "Ready for merge by {0}.".format(", ".join(approved_by))
+        return ("Ready for merge by {0}.", ", ".join(approved_by), None)
     else:
-        return "Awaiting merge review."
+        return ("Awaiting merge review.", None, None)
 
 def do_report(args):
     for c in changes():
         print("{} - {}".format(c['url'], c['id']))
         print(c['subject'])
-        print(reason(c))
+        (r,people,dep) = reason(c)
+        print(r.format(people,dep))
         print("----")
 
 parser = argparse.ArgumentParser()

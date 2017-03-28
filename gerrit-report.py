@@ -90,7 +90,7 @@ def map_approvals(approvals):
         if approval_type not in mapped:
             mapped[approval_type] = {}
 
-        mapped[approval_type][approval_owner[0]] = approval_score
+        mapped[approval_type][approval_owner] = approval_score
 
     return mapped
 

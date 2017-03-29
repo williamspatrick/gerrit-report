@@ -80,7 +80,7 @@ def map_username(user):
         user[0], "[{}: {}]".format(user[0], user[1]))
 
 
-def map_approvals(approvals):
+def map_approvals(approvals, owner):
     mapped = {}
     for a in approvals:
         approval_type = a['type']
@@ -89,6 +89,10 @@ def map_approvals(approvals):
 
         if approval_type not in mapped:
             mapped[approval_type] = {}
+
+        # Don't allow the owner to self-+1 on code-reviews.
+        if approval_type == 'Code-Review' and approval_owner == owner:
+            continue
 
         mapped[approval_type][approval_owner] = approval_score
 
@@ -122,7 +126,7 @@ def reason(change):
     else:
         reviewers = []
     if 'approvals' in change['currentPatchSet']:
-        approvals = map_approvals(change['currentPatchSet']['approvals'])
+        approvals = map_approvals(change['currentPatchSet']['approvals'], owner)
     else:
         approvals = {}
 

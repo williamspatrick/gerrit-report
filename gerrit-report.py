@@ -102,13 +102,20 @@ def map_approvals(approvals, owner):
 def map_reviewers(reviewers, owner):
     mapped = []
     for r in reviewers:
-        reviewer_user = r['username']
-        reviewer_name = r['name']
+        if 'username' in r:
+            reviewer_user = r['username']
+        else:
+            reviewer_user = "Anonymous-User"
+
+        if 'name' in r:
+            reviewer_name = r['name']
+        else:
+            reviewer_name = "Anonymous Coward"
 
         if reviewer_user == 'jenkins-openbmc':
             continue
 
-        reviewer_username = (r['username'], r['name'])
+        reviewer_username = (reviewer_user, reviewer_name)
 
         if reviewer_user == owner[0]:
             continue

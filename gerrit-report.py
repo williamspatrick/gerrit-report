@@ -91,7 +91,8 @@ def map_approvals(approvals, owner):
             mapped[approval_type] = {}
 
         # Don't allow the owner to self-+1 on code-reviews.
-        if approval_type == 'Code-Review' and approval_owner == owner:
+        if approval_type == 'Code-Review' and approval_owner == owner and \
+                approval_score > 0:
             continue
 
         mapped[approval_type][approval_owner] = approval_score

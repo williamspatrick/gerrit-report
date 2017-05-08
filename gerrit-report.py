@@ -84,7 +84,8 @@ def map_approvals(approvals, owner):
     mapped = {}
     for a in approvals:
         approval_type = a['type']
-        approval_owner = (a['by']['username'], a['by']['name'])
+        approval_owner = (a['by'].get('username', "nobody"),
+                          a['by'].get('name', "Anonymous Coward"))
         approval_score = int(a['value'])
 
         if approval_type not in mapped:
